@@ -1,0 +1,378 @@
+rm(list=ls())
+library(sn)
+
+Gussiankernel=function(X,lambda,n){
+
+f1=function(x){ 
+fff1=((-1/sqrt(2*pi))*(exp(-(x^2)/2)*(1-((x^2)*pnorm((lambda*x)))+2*(x*lambda*dnorm((lambda*x))))))
+fff2=((((lambda^3)*x)/sqrt(2*pi))*exp(-((x^2)*(lambda^2))/2)*dnorm((lambda*x)))
+(fff1-fff2)^2
+}
+val11=integrate(f1,-Inf,Inf)$value
+
+kernel11=function(x)((1/sqrt(2*pi))*exp(-(x^2)/2))^2
+val12=integrate(kernel11,-Inf,Inf)$value
+
+kernel12=function(x)((1/sqrt(2*pi))*exp(-(x^2)/2))*(x^2)
+val13=integrate(kernel12,-Inf,Inf)$value
+
+h.hat.norm=((val12/(n*val11*(val13^2)))^(1/5))
+KERNEL1.norm=function(a1)(1/sqrt(2*pi))*exp(-(a1^2)/2)
+m=mean(X)
+
+y.norm=seq(m-h.hat.norm,m+h.hat.norm,0.01)
+f.hat.NORM=f.exact.norm=mise.norm=c()
+for(i in 1:length(y.norm)){ 
+z.norm=f.hat.norm=c()
+for(j in 1:n){ 
+z.norm[j]=(y.norm[i]-X[j])/(h.hat.norm)
+f.hat.norm[j]=KERNEL1.norm(z.norm[j])
+}
+f.exact.norm[i]=2*dnorm(y.norm[i])*pnorm(lambda*y.norm[i])
+f.hat.NORM[i]=(1/(n*h.hat.norm))*sum(f.hat.norm)
+mise.norm[i]=(f.hat.NORM[i]-f.exact.norm[i])^2
+}
+plot(density(f.hat.NORM),lwd=2,col="black",xlab="x",ylab="fhat",main="Gaussian Kernel",cex.main=1.5)
+mtext(expression(h==h.hat.norm~","~MISE==mean(mise.norm)), side = 3, line = 0, outer = FALSE,cex=0.85)
+list(mise=mean(mise.norm),h=h.hat.norm)
+}
+
+#------------------------------------------------------------------------------------------
+
+Beweightkernel=function(X,lambda,n){
+
+f1=function(x){ 
+fff1=((-1/sqrt(2*pi))*(exp(-(x^2)/2)*(1-((x^2)*pnorm((lambda*x)))+2*(x*lambda*dnorm((lambda*x))))))
+fff2=((((lambda^3)*x)/sqrt(2*pi))*exp(-((x^2)*(lambda^2))/2)*dnorm((lambda*x)))
+(fff1-fff2)^2
+}
+val11=integrate(f1,-Inf,Inf)$value
+
+kernel21=function(x)(((1-(x^2))^2))^2
+val22=integrate(kernel21,-1,1)$value*(15/16)
+
+kernel22=function(x)(((1-(x^2))^2))*(x^2)
+val23=integrate(kernel22,-1,1)$value*(15/16)
+
+h.hat.tw=((val22/(n*val11*(val23^2)))^(1/5))
+
+KERNEL2.TW=function(a1)(15/16)*((1-(a1^2))^2)
+m=mean(X)
+y.tw=seq(m-h.hat.tw,m+h.hat.tw,0.01)
+f.hat.TW=f.exact.tw=mise.tw=c()
+
+for(i in 1:length(y.tw)){ 
+z.tw=f.hat.tw=c()
+for(j in 1:n){ 
+if(X[j]-h.hat.tw<=y.tw[i]&y.tw[i]<=X[j]+h.hat.tw){
+z.tw[j]=(y.tw[i]-X[j])/(h.hat.tw)
+f.hat.tw[j]=KERNEL2.TW(z.tw[j])
+}else{
+f.hat.tw[j]==0
+}
+}
+f.exact.tw[i]=2*dnorm(y.tw[i])*pnorm(lambda*y.tw[i])
+f.hat.TW[i]=(1/(n*h.hat.tw))*sum(f.hat.tw)
+mise.tw[i]=(f.hat.TW[i]-f.exact.tw[i])^2
+}
+
+plot(density(f.hat.TW),lwd=2,col="black",xlab="x",ylab="fhat",main="Beweight Kernel",cex.main=1.5)
+mtext(expression(h==h.hat.tw~","~MISE==mean(mise.tw)), side = 3, line = 0, outer = FALSE,cex=0.85)
+list(mise=mean(mise.tw),h=h.hat.tw)
+}
+
+#------------------------------------------------------------------------------------------
+Epanechnikovkernel=function(X,lambda,n){
+
+f1=function(x){ 
+fff1=((-1/sqrt(2*pi))*(exp(-(x^2)/2)*(1-((x^2)*pnorm((lambda*x)))+2*(x*lambda*dnorm((lambda*x))))))
+fff2=((((lambda^3)*x)/sqrt(2*pi))*exp(-((x^2)*(lambda^2))/2)*dnorm((lambda*x)))
+(fff1-fff2)^2
+}
+val11=integrate(f1,-Inf,Inf)$value
+
+kernel31=function(x)((1-(x^2)))^2
+val32=integrate(kernel31,-1,1)$value*(3/4)
+
+kernel32=function(x)((1-(x^2)))*(x^2)
+val33=integrate(kernel32,-1,1)$value*(3/4)
+
+h.hat.Ipa=((val32/(n*val11*(val33^2)))^(1/5))
+KERNEL2.IPA=function(a1)(3/4)*(1-(a1^2))
+m=mean(X)
+y.Ipa=seq(m-h.hat.Ipa,m+h.hat.Ipa,0.01)
+
+
+f.hat.IPA=f.exact.Ipa=mise.Ipa=c()
+for(i in 1:length(y.Ipa)){ 
+z.Ipa=f.hat.Ipa=c()
+for(j in 1:n){ 
+if(X[j]-h.hat.Ipa<=y.Ipa[i]&y.Ipa[i]<=X[j]+h.hat.Ipa){
+z.Ipa[j]=(y.Ipa[i]-X[j])/(h.hat.Ipa)
+f.hat.Ipa[j]=KERNEL2.IPA(z.Ipa[j])
+}else{
+f.hat.Ipa[j]=0
+}
+}
+f.exact.Ipa[i]=2*dnorm(y.Ipa[i])*pnorm(lambda*y.Ipa[i])
+f.hat.IPA[i]=(1/(n*h.hat.Ipa))*sum(f.hat.Ipa)
+mise.Ipa[i]=(f.hat.IPA[i]-f.exact.Ipa[i])^2
+}
+plot(density(f.hat.IPA),lwd=2,col="black",xlab="x",ylab="fhat",main="Epanechnikov Kernel",cex.main=1.5)
+mtext(expression(h==h.hat.Ipa~","~MISE==mean(mise.Ipa)), side = 3, line = 0, outer = FALSE,cex=0.85)
+
+list(mise=mean(mise.Ipa),h=h.hat.Ipa)
+}
+
+#------------------------------------------------------------------------------------------
+Bsplinelinear=function(X,lambda,n){
+
+s=seq(-4,4,1)
+f.hat.spline1=f.exact.spline1=mise.spline1=c()
+h.spline1=sqrt((6*sd(X))/(2*n))
+y.spline1=seq(-3*h.spline1,3*h.spline1,0.01)
+
+
+B1.FUNC=function(b1){
+if(b1<0&b1>=-1){
+ value1=1+b1
+}else{
+if(b1>=0&b1<=1){
+ value1=1-b1
+}else{
+if((b1>1)|(b1<-1)){
+value1=0
+}
+}
+}
+value1
+}
+
+for(i in 1:length(y.spline1)){
+z.spline1=c()
+for(j in 1:n){ 
+zz.spline1=c()
+for(jj in 1:length(s)){ 
+zz.spline1[jj]=B1.FUNC((X[j]/h.spline1)-s[jj])*B1.FUNC((y.spline1[i]/h.spline1)-s[jj])
+}
+z.spline1[j]=sum(zz.spline1)
+}
+f.hat.spline1[i]=(1/(n*h.spline1))*sum(z.spline1)
+f.exact.spline1[i]=2*dnorm(y.spline1[i])*pnorm(lambda*y.spline1[i])
+mise.spline1[i]=(f.hat.spline1[i]-f.exact.spline1[i])^2
+}
+plot(density(f.hat.spline1),lwd=2,col="black",xlab="x",ylab="fhat",main="B-Spline(r=2)",cex.main=1.5)
+mtext(expression(h==h.spline1~","~MISE==mean(mise.spline1)), side = 3, line = 0, outer = FALSE,cex=0.85)
+list(mise=mean(mise.spline1),h=h.spline1)
+}
+#------------------------------------------------------------------------------------------
+Bsplinequadratic=function(X,lambda,n){
+
+s=seq(-4,4,1)
+f.hat.spline2=f.exact.spline2=mise.spline2=c()
+h.spline2=sqrt((6*sd(X))/(3*n))
+y.spline2=seq(-3.5*h.spline2,3.5*h.spline2,0.01)
+
+B2.FUNC=function(b2){
+if(b2<(-1/2)&b2>=(-3/2)){
+ value2=(1/2)*((b2+(3/2))^2)
+}else{
+if(b2<=(1/2)&b2>=(-1/2)){
+ value2=(-(b2^2))+(3/4)
+}else{
+if(b2<=(3/2)&b2>(1/2)){
+  value2=(1/2)*((b2-(3/2))^2)
+}else{
+if((b2>(3/2))|(b2<-(3/2)))
+ value2=0
+}
+}
+}
+value2
+}
+
+for(i in 1:length(y.spline2)){
+z.spline2=c()
+for(j in 1:n){ 
+zz.spline2=c()
+for(jj in 1:length(s)){ 
+zz.spline2[jj]=B2.FUNC((X[j]/h.spline2)-s[jj])*B2.FUNC((y.spline2[i]/h.spline2)-s[jj])
+}
+z.spline2[j]=sum(zz.spline2)
+}
+f.hat.spline2[i]=(1/(n*h.spline2))*sum(z.spline2)
+f.exact.spline2[i]=2*dnorm(y.spline2[i])*pnorm(lambda*y.spline2[i])
+mise.spline2[i]=(f.hat.spline2[i]-f.exact.spline2[i])^2
+}
+plot(density(f.hat.spline2),lwd=2,col="black",xlab="x",ylab="fhat",main="B-Spline(r=3)",cex.main=1.5)
+mtext(expression(h==h.spline2~","~MISE==mean(mise.spline2)), side = 3, line = 0, outer = FALSE,cex=0.85)
+list(mise=mean(mise.spline2),h=h.spline2)
+}
+#------------------------------------------------------------------------------------------
+
+waveletshard=function(X,lambda,n){
+
+f=c()
+J=floor(log(n, base = 2)-log(log(n, base = 2)))
+k.min=floor(((2^J)*min(X))-1)
+k.max=floor(((2^J)*max(X)))
+L=k.max-k.min
+ctilda=matrix(1:(L+1),ncol=1)
+phi=matrix(rep(0,(n*(L+1))),ncol=n)
+
+for(i in 1:n){
+for(k in k.min:k.max){
+
+if(k<=X[i]&X[i]<(k+1)){
+phi[(k-k.min+1),i]=1
+}
+}
+}
+for(k in 1:(L+1)){
+ctilda[k,1]=mean(phi[k,])
+}
+SUM1=t(ctilda)%*%phi
+
+psi=list(1:n)
+a=matrix(0,nrow=(L+1),ncol=J+1)
+for(i in 1:n){
+W=matrix(0,nrow=(L+1),ncol=J+1)
+for(j in 0:J){
+for(k in k.min:k.max){
+if(((2^(-j))*k)<=X[i]&X[i]<((2^(-j))*(k+0.5))){
+W[(k-k.min+1),(j+1)]=2^(j/2)
+}else{
+if(((2^(-j))*(k+0.5))<=X[i]&X[i]<((2^(-j))*(k+1))){
+W[(k-k.min+1),(j+1)]=-2^(j/2)
+}else{
+W[(k-k.min+1),(j+1)]=0
+}
+}
+}
+}
+psi[[i]]=W
+a=a+psi[[i]]
+}
+d.tilda=a/n
+
+
+sigma.hat=sd(X)
+lambda.hat=sigma.hat*sqrt((2*log(n))/n)
+
+d.hat=matrix(0,nrow=(L+1),ncol=J+1)
+for(j in 0:J){
+for(k in k.min:k.max){
+if(abs(d.tilda[(k-k.min+1),(j+1)])>lambda.hat){
+d.hat[(k-k.min+1),(j+1)]=d.tilda[(k-k.min+1),(j+1)]
+}else{
+d.hat[(k-k.min+1),(j+1)]=0
+}
+}
+}
+
+SUM2=c()
+for(i in 1:n){
+SUM2[i]=SUM1[i]+sum(t(d.hat)%*%psi[[i]])
+}
+f.exact=2*dnorm(X)*pnorm(lambda*X)
+mise.hard=mean((SUM2-f.exact)^2)
+plot(density(SUM2),lwd=2,col="black",xlab="x",ylab="fhat",main="Wavelets(hard)",cex.main=1.5)
+mtext(expression(MISE==mise.hard), side = 3, line = 0, outer = FALSE,cex=0.85)
+list(mise=mise.hard)
+}
+#-----------------------------------------------------------------------------------------------
+waveletssoft=function(X,lambda,n){
+
+f=c()
+J=floor(log(n, base = 2)-log(log(n, base = 2)))
+k.min=floor(((2^J)*min(X))-1)
+k.max=floor(((2^J)*max(X)))
+L=k.max-k.min
+ctilda=matrix(1:(L+1),ncol=1)
+phi=matrix(rep(0,(n*(L+1))),ncol=n)
+
+for(i in 1:n){
+for(k in k.min:k.max){
+
+if(k<=X[i]&X[i]<(k+1)){
+phi[(k-k.min+1),i]=1
+}
+}
+}
+for(k in 1:(L+1)){
+ctilda[k,1]=mean(phi[k,])
+}
+SUM1=t(ctilda)%*%phi
+
+psi=list(1:n)
+a=matrix(0,nrow=(L+1),ncol=J+1)
+for(i in 1:n){
+W=matrix(0,nrow=(L+1),ncol=J+1)
+for(j in 0:J){
+for(k in k.min:k.max){
+if(((2^(-j))*k)<=X[i]&X[i]<((2^(-j))*(k+0.5))){
+W[(k-k.min+1),(j+1)]=2^(j/2)
+}else{
+if(((2^(-j))*(k+0.5))<=X[i]&X[i]<((2^(-j))*(k+1))){
+W[(k-k.min+1),(j+1)]=-2^(j/2)
+}else{
+W[(k-k.min+1),(j+1)]=0
+}
+}
+}
+}
+psi[[i]]=W
+a=a+psi[[i]]
+}
+d.tilda=a/n
+
+sigma.hat=sd(X)
+lambda.hat=sigma.hat*sqrt((2*log(n))/n)
+
+d.hat=matrix(0,nrow=(L+1),ncol=J+1)
+for(j in 0:J){
+for(k in k.min:k.max){
+d.hat[(k-k.min+1),(j+1)]=max(0,(abs(d.tilda[(k-k.min+1),(j+1)])-lambda.hat))*sign(d.tilda[(k-k.min+1),(j+1)])
+}
+}
+SUM2=c()
+for(i in 1:n){
+SUM2[i]=SUM1[i]+sum(t(d.hat)%*%psi[[i]])
+}
+f.exact=2*dnorm(X)*pnorm(lambda*X)
+mise.soft=mean((SUM2-f.exact)^2)
+plot(density(SUM2),lwd=2,col="black",xlab="x",ylab="fhat",main="Wavelets(soft)",cex.main=1.5)
+mtext(expression(MISE==mise.soft), side = 3, line = 0, outer = FALSE,cex=0.85)
+list(mise=mise.soft)
+}
+
+#-----------------------------------------------------------------------------------------------
+
+MISE.FUNC=function(lambda,n,N){
+
+MISE.mat=matrix(0,N,7)
+for(k in 1:N){ 
+XX=rsn(n,0,1,lambda)
+
+mise.mat1=Gussiankernel(XX,lambda,n)$mise
+mise.mat2=Beweightkernel(XX,lambda,n)$mise
+mise.mat3=Epanechnikovkernel(XX,lambda,n)$mise
+mise.mat4=Bsplinelinear(XX,lambda,n)$mise
+mise.mat5=Bsplinequadratic(XX,lambda,n)$mise
+mise.mat6=waveletshard(XX,lambda,n)$mise
+mise.mat7=waveletssoft(XX,lambda,n)$mise
+
+MISE.mat[k,]=c(mise.mat1,mise.mat2,mise.mat3,mise.mat4,mise.mat5,mise.mat6,mise.mat7)
+}
+MISE.MAT=apply(MISE.mat,2,mean)
+rownames=c("Gussiankernel","Beweightkernel","Epanechnikovkernel","Bsplinelinear","Bsplinequadratic","waveletshard","waveletssoft")
+MISE=data.frame(rownames,MISE.MAT)
+list(MISE=MISE)
+}
+
+
+
+
+
+
+
