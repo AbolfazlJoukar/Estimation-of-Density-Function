@@ -1,8 +1,6 @@
 rm(list=ls())
 library(sn)
-
 Gussiankernel=function(X,lambda,n){
-
 f1=function(x){ 
 fff1=((-1/sqrt(2*pi))*(exp(-(x^2)/2)*(1-((x^2)*pnorm((lambda*x)))+2*(x*lambda*dnorm((lambda*x))))))
 fff2=((((lambda^3)*x)/sqrt(2*pi))*exp(-((x^2)*(lambda^2))/2)*dnorm((lambda*x)))
@@ -347,13 +345,10 @@ list(mise=mise.soft)
 }
 
 #-----------------------------------------------------------------------------------------------
-
 MISE.FUNC=function(lambda,n,N){
-
 MISE.mat=matrix(0,N,7)
 for(k in 1:N){ 
 XX=rsn(n,0,1,lambda)
-
 mise.mat1=Gussiankernel(XX,lambda,n)$mise
 mise.mat2=Beweightkernel(XX,lambda,n)$mise
 mise.mat3=Epanechnikovkernel(XX,lambda,n)$mise
